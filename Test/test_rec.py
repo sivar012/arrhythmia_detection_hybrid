@@ -1,6 +1,4 @@
-# ============================================================
-# CNN + META-RF PIPELINE (FLASK READY - OPTION 3)
-# ============================================================
+# CNN + META-RF PIPELINE
 
 import os
 import numpy as np
@@ -11,10 +9,8 @@ from collections import Counter
 from scipy.signal import butter, filtfilt
 from sklearn.ensemble import RandomForestClassifier
 
-# ============================================================
 # CONFIG
-# ============================================================
-MODEL_PATH = "D:\\Arrhythmia\\models\\best_final_hybrid.h5"   # put model in same folder
+MODEL_PATH = "D:\\Arrhythmia\\models\\best_final_hybrid.h5"   
 
 BEAT_LEN = 280
 PRE_R = 90
@@ -31,16 +27,12 @@ record_major_class = {
     117:"S",118:"S",119:"V",121:"S",122:"N",123:"V",124:"V"
 }
 
-# ============================================================
 # LOAD CNN
-# ============================================================
 print("Loading beat-level CNN...")
 beat_model = tf.keras.models.load_model(MODEL_PATH)
 print("CNN loaded ✔")
 
-# ============================================================
 # ECG FILTER
-# ============================================================
 def filter_ecg(sig, fs):
     nyq = 0.5 * fs
     b, a = butter(4, [0.5/nyq, 40/nyq], btype='band')
@@ -48,9 +40,7 @@ def filter_ecg(sig, fs):
     sig = (sig - sig.mean()) / (sig.std() + 1e-8)
     return sig
 
-# ============================================================
 # BEAT EXTRACTION (UPDATED)
-# ============================================================
 def extract_beats_from_record(rec_id, base_path):
     record = wfdb.rdrecord(os.path.join(base_path, rec_id))
     ann = wfdb.rdann(os.path.join(base_path, rec_id), 'atr')
@@ -76,18 +66,14 @@ def extract_beats_from_record(rec_id, base_path):
     X = np.array(beats, dtype=np.float32)[..., np.newaxis]
     return X, sig, rlocs, fs
 
-# ============================================================
 # BEAT PREDICTION
-# ============================================================
 def predict_beats(X):
     probs = beat_model.predict(X, verbose=0)
     idx = np.argmax(probs, axis=1)
     preds = [IDX_TO_CLASS[i] for i in idx]
     return preds, probs
 
-# ============================================================
 # RECORD FEATURES
-# ============================================================
 def record_features(rec_id, base_path):
     X, _, _, _ = extract_beats_from_record(rec_id, base_path)
     preds, probs = predict_beats(X)
@@ -104,9 +90,7 @@ def record_features(rec_id, base_path):
     ]
     return np.array(feat).reshape(1, -1)
 
-# ============================================================
 # TRAIN META RANDOM FOREST (ONCE)
-# ============================================================
 print("Training Meta RandomForest...")
 X_meta, y_meta = [], []
 
@@ -121,9 +105,7 @@ meta_clf.fit(np.array(X_meta), np.array(y_meta))
 
 print("Meta-RF trained ✔")
 
-# ============================================================
 # FINAL INFERENCE FUNCTION (FLASK USES THIS)
-# ============================================================
 def predict_and_plot_record(rec_id, base_path, save_dir, seconds=10):
 
     X, sig, rlocs, fs = extract_beats_from_record(rec_id, base_path)
