@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Arrhythmia Detection AI</title>
+
+    <style>
+        body {
+            margin: 0;
+            font-family: Arial, sans-serif;
+            background: radial-gradient(circle at top, #071b20, #02090c);
+            color: white;
+        }
+
+        /* HEARTBEAT BACKGROUND */
+        .heartbeat-bg {
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.6;
+        }
+
+        .heartbeat-bg svg {
+            width: 200%;
+            height: 200px;
+            position: absolute;
+            top: 45%;
+            left: -50%;
+        }
+
+        .heartbeat-bg path {
+            fill: none;
+            stroke: #2effc4;
+            stroke-width: 4;
+            stroke-dasharray: 1200;
+            stroke-dashoffset: 1200;
+            animation: heartbeat 3s linear infinite;
+        }
+
+        @keyframes heartbeat {
+            to {
+                stroke-dashoffset: 0;
+            }
+        }
+
+        /* LAYOUT */
+        .center {
+            display: flex;
+            height: 100vh;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(12px);
+            padding: 30px;
+            width: 420px;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 0 30px rgba(46, 255, 196, 0.4);
+        }
+
+        input,
+        button {
+            width: 100%;
+            padding: 12px;
+            margin: 12px 0;
+            border-radius: 6px;
+            border: none;
+        }
+
+        button {
+            background: linear-gradient(135deg, #2effc4, #00bfa6);
+            color: #012;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            transform: scale(1.05);
+        }
+
+        img {
+            width: 100%;
+            margin-top: 12px;
+            border-radius: 8px;
+            border: 1px solid #2effc4;
+        }
+
+        #status {
+            margin-top: 15px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="heartbeat-bg">
+        <svg viewBox="0 0 1200 200">
+            <path d="M0 100 L150 100 L180 60 L210 140 L240 100
+         L350 100 L380 60 L410 140 L440 100 L1200 100" />
+        </svg>
+    </div>
+
+    <div class="center">
+        <div class="card">
+
+            <h2>🫀 Arrhythmia Detection AI</h2>
+            <p style="font-size:13px;color:#9ff;">
+                Upload ECG ZIP containing <b>.dat + .hea + .atr</b>
+            </p>
+
+            <input type="file" id="ecgFile" accept=".zip">
+            <button onclick="analyzeECG()">Analyze ECG</button>
+
+            <div id="status"></div>
+            <div id="result"></div>
+
+        </div>
+    </div>
+
+    <script>
+        function analyzeECG() {
+
+            const fileInput = document.getElementById("ecgFile");
+            const status = document.getElementById("status");
+            const result = document.getElementById("result");
+
+            if (!fileInput.files.length) {
+                alert("Please select a ZIP file");
+                return;
+            }
+
+            status.innerHTML = "⏳ Analyzing ECG...";
+            result.innerHTML = "";
+
+            const formData = new FormData();
+            formData.append("file", fileInput.files[0]);
+
+            fetch("/analyze", {
+                method: "POST",
+                body: formData
+            })
+                .then(res => res.json())
+                .then(data => {
+
+                    if (data.error) {
+                        status.innerHTML = "❌ " + data.error;
+                        return;
+                    }
+
+                    status.innerHTML = `
+            <h3>🫀 Arrhythmia Result</h3>
+
+            <div style="
+                background:${data.color};
+                padding:10px;
+                border-radius:8px;
+                font-size:18px;
+                font-weight:bold;
+            ">
+                ${data.risk}
+            </div>
+
+            <p>
+                <b>Class:</b> ${data.prediction}<br>
+                <b>Confidence:</b> ${(data.confidence * 100).toFixed(2)}%
+            </p>
+        `;
+
+                    result.innerHTML = `
+            <img src="/results/plots/${data.plot}?t=${Date.now()}">
+
+            <a href="/download/${data.pdf}"
+               style="
+                display:block;
+                margin-top:12px;
+                padding:10px;
+                background:#2effc4;
+                color:#012;
+                text-decoration:none;
+                border-radius:6px;
+                font-weight:bold;
+               ">
+               📄 Download PDF Report
+            </a>
+        `;
+                })
+                .catch(() => {
+                    status.innerHTML = "❌ Server error";
+                });
+        }
+    </script>
+
+</body>
+
+</html>
