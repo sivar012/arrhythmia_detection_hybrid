@@ -11,7 +11,5 @@ build/
 .DS_Store
 .vscode/
 .idea/
-models/
-meta_rf/
 uploads/
 results/
