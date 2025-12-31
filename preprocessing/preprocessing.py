@@ -5,20 +5,16 @@ from collections import Counter
 from scipy.signal import butter, filtfilt
 import wfdb
 
-# ============================================================
 # CONFIGURATION
-# ============================================================
 LOCAL_DB_DIR = '/content/drive/MyDrive/Siva/data/mitbih'
 
-BEAT_LEN = 280          # final beat length (samples)
+BEAT_LEN = 280          # final beat length 
 PRE_R  = 90             # samples before R-peak
 POST_R = 190            # samples after R-peak
 RANDOM_STATE = 42
 TEST_SIZE = 0.2
 
-# ============================================================
 # CORRECT AAMI MAPPING (MIT-BIH → AAMI EC57 5 classes)
-# ============================================================
 AAMI_MAP = {
     # N class (Normal)
     'N':'N','L':'N','R':'N','e':'N','j':'N','E':'N',
@@ -40,9 +36,7 @@ AAMI_CLASSES = ['N','S','V','F','Q']
 CLASS_TO_IDX = {'N':0,'S':1,'V':2,'F':3,'Q':4}
 
 
-# ============================================================
 # ECG FILTERING
-# ============================================================
 def filter_ecg(sig, fs):
     nyq = 0.5 * fs
 
@@ -60,9 +54,7 @@ def filter_ecg(sig, fs):
     return sig
 
 
-# ============================================================
 # BEAT EXTRACTION
-# ============================================================
 def extract_beats_from_record(rec_name):
     rec_path = os.path.join(LOCAL_DB_DIR, rec_name)
 
@@ -103,9 +95,7 @@ def extract_beats_from_record(rec_name):
     return beats, labels
 
 
-# ============================================================
 # MAIN PROCESSING
-# ============================================================
 print(" Processing MIT-BIH records...\n")
 
 records = sorted([
@@ -137,9 +127,7 @@ print("\n FINAL EXTRACTION RESULTS")
 print(f" Total beats: {len(X):,}")
 print(f" Class counts: {Counter(y)}\n")
 
-# ============================================================
 # BALANCE + SAVE DATASET
-# ============================================================
 from sklearn.model_selection import train_test_split
 
 if len(X) == 0:
