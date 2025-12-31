@@ -8,7 +8,7 @@ from scipy.signal import butter, filtfilt
 from sklearn.ensemble import RandomForestClassifier
 
 # ========= CONFIG =========
-TRAIN_DB_DIR = r"D:\\Arrhythmia\\Dataset\\mitbih"   # <-- REAL MIT-BIH PATH
+TRAIN_DB_DIR = r"D:\\Arrhythmia\\Dataset\\mitbih"   
 MODEL_PATH = r"D:\\Arrhythmia\\models\\best_final_hybrid.h5"
 
 BEAT_LEN = 280
@@ -24,7 +24,7 @@ record_major_class = {
     117:"S",118:"S",119:"V",121:"S",122:"N",123:"V",124:"V"
 }
 
-# ========= LOAD CNN =========
+# ========= LOAD Hybrid Model =========
 beat_model = tf.keras.models.load_model(MODEL_PATH)
 
 def filter_ecg(sig, fs):
