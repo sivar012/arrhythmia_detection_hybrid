@@ -26,9 +26,9 @@ CLASS_TO_IDX = {'N':0,'S':1,'V':2,'F':3,'Q':4}
 IDX_TO_CLASS = {v:k for k,v in CLASS_TO_IDX.items()}
 
 # ================= LOAD MODELS =================
-print("Loading beat-level CNN...")
+print("Loading beat-level Hybrid Model...")
 beat_model = tf.keras.models.load_model(MODEL_PATH)
-print("CNN loaded ✔")
+print("Hybrid Model loaded ✔")
 
 print("Loading Meta RandomForest...")
 meta_clf = joblib.load(META_MODEL_PATH)
